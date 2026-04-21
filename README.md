@@ -214,21 +214,6 @@ This ensures the confidence chart always shows all 6 bars regardless of the sele
 
 ---
 
-## 🛠️ Bugs Fixed (v1.1)
-
-| # | File | Bug | Impact | Fix |
-|---|---|---|---|---|
-| 1 | `config.py` | `MODELS_DIR = 'models'` (wrong case) | 💥 Crash on Linux/macOS | Changed to `'Models'` |
-| 2 | `config.py` | All 3 model filenames were wrong | 💥 Models never load | Fixed to match actual `.joblib` filenames |
-| 3 | `config.py` | `VECTORIZER_FILE = 'vectorizer_BoW.joblib'` | 💥 Vectorizer never loads | Fixed to `tfidf_vectorizer.joblib` |
-| 4 | `config.py` | `ENCODER_FILE = 'encoder.joblib'` | 💥 Encoder never loads | Fixed to `label_encoder.joblib` |
-| 5 | `predictor.py` | LinearSVC has no `predict_proba` → chart showed 1 bar | 🔴 Wrong output | Added `decision_function` + softmax for all 6 classes |
-| 6 | `predictor.py` | Hardcoded `{0:'anger'...}` fallback when encoder is `None` | 🔴 Wrong output | Raises clear `ValueError` if encoder missing |
-| 7 | `file_processor.py` | Generic "unsupported" error when library missing | 🟡 Confusing UX | Shows exact `pip install` command needed |
-| 8 | `visualizer.py` | White matplotlib background broke dark mode | 🟡 Visual glitch | Set transparent figure + axes background |
-| 9 | `main.py` Tab3 | All previous example charts re-rendered on every click | 🟡 Page clutter | Only last-clicked example shows its chart |
-
----
 
 ## 🔮 Possible Future Improvements
 
