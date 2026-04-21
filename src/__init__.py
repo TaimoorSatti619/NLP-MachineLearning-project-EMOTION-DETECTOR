@@ -1,19 +1,28 @@
 # src/__init__.py
-from .config import EMOTION_PALETTE, MODEL_META, MODEL_PATHS
-from .model_loader import load_all_models
-from .preprocess import preprocess_text
+from .config import (
+    PROJECT_ROOT, MODELS_DIR, MODEL_FILES,
+    VECTORIZER_FILE, ENCODER_FILE,
+    EMOTION_COLORS, EMOTION_EMOJIS,
+)
+from .preprocess import clean_text, split_into_sentences
+from .file_processor import process_uploaded_file, PDF_SUPPORT, DOCX_SUPPORT
+from .model_loader import load_vectorizer, load_encoder, load_all_models
 from .predictor import predict_emotion
-from .file_processor import extract_texts_from_file
-from .visualizer import render_probability_bars, render_result_card
+from .visualizer import get_emotion_color, get_emotion_emoji, plot_confidence_scores
 
 __all__ = [
-    "EMOTION_PALETTE",
-    "MODEL_META",
-    "MODEL_PATHS",
-    "load_all_models",
-    "preprocess_text",
-    "predict_emotion",
-    "extract_texts_from_file",
-    "render_probability_bars",
-    "render_result_card",
+    # config
+    'PROJECT_ROOT', 'MODELS_DIR', 'MODEL_FILES',
+    'VECTORIZER_FILE', 'ENCODER_FILE',
+    'EMOTION_COLORS', 'EMOTION_EMOJIS',
+    # preprocess
+    'clean_text', 'split_into_sentences',
+    # file processor
+    'process_uploaded_file', 'PDF_SUPPORT', 'DOCX_SUPPORT',
+    # model loader
+    'load_vectorizer', 'load_encoder', 'load_all_models',
+    # predictor
+    'predict_emotion',
+    # visualizer
+    'get_emotion_color', 'get_emotion_emoji', 'plot_confidence_scores',
 ]

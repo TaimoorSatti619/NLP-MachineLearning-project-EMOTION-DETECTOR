@@ -1,6 +1,6 @@
-# 🧠 EmotionDetector AI
+# 🎭 Emotion Detection System
 
-A professional **Streamlit web application** for detecting emotions in text using trained Machine Learning models. Built with a clean modular architecture, dark/light theme support, batch file processing, and real-time probability visualization.
+A professional **Streamlit web application** that detects emotions in text using trained Machine Learning models. Built with a clean modular architecture, batch file processing, confidence visualization, and full dark/light mode support.
 
 ---
 
@@ -10,34 +10,34 @@ A professional **Streamlit web application** for detecting emotions in text usin
 EmotionDetector/
 │
 ├── App/
-│   └── main.py                  ← Streamlit app entry point
+│   └── main.py                        ← Streamlit app entry point
 │
 ├── Data/
-│   └── train.txt                ← Training dataset (text;emotion format)
+│   └── train.txt                      ← Training dataset (text;emotion format)
 │
 ├── Models/
-│   ├── tfidf_vectorizer.joblib  ← TF-IDF vectorizer
-│   ├── label_encoder.joblib     ← Sklearn LabelEncoder
-│   ├── linearsvc_model.joblib   ← LinearSVC classifier
+│   ├── tfidf_vectorizer.joblib        ← TF-IDF vectorizer
+│   ├── label_encoder.joblib           ← Sklearn LabelEncoder
+│   ├── linearsvc_model.joblib         ← Linear SVM classifier
 │   ├── logistic_regression_model.joblib
-│   └── xgboost_model.joblib     ← XGBoost classifier
+│   └── xgboost_model.joblib           ← XGBoost classifier
 │
 ├── NoteBooks/
-│   └── ProjectFile.ipynb        ← Training & EDA notebook
+│   └── ProjectFile.ipynb              ← Training & EDA notebook
 │
-├── src/                         ← Modular backend package
-│   ├── __init__.py              ← Package exports
-│   ├── config.py                ← Emotion palette & model metadata
-│   ├── file_processor.py        ← CSV / TXT / PDF / DOCX extractors
-│   ├── model_loader.py          ← Joblib model loading
-│   ├── predictor.py             ← Prediction + probability logic
-│   ├── preprocess.py            ← Text cleaning pipeline
-│   └── visualizer.py            ← HTML result card & probability bars
+├── src/                               ← Modular backend package
+│   ├── __init__.py                    ← Package exports
+│   ├── config.py                      ← Paths, filenames, emotion palette
+│   ├── preprocess.py                  ← Text cleaning & sentence splitting
+│   ├── file_processor.py              ← CSV / TXT / PDF / DOCX extractors
+│   ├── model_loader.py                ← Joblib model loading (cached)
+│   ├── predictor.py                   ← Prediction + probability logic
+│   └── visualizer.py                  ← Matplotlib confidence bar chart
 │
 ├── requirements.txt
-├── README.md
 ├── .gitignore
-└── pyproject.toml
+├── pyproject.toml
+└── README.md
 ```
 
 ---
@@ -77,11 +77,11 @@ pip install -r requirements.txt
 streamlit run App/main.py
 ```
 
-The app will open at `http://localhost:8501`
+The app opens at **http://localhost:8501**
 
 ---
 
-## 📦 Dependencies
+## 📦 Requirements
 
 ```
 streamlit>=1.32.0
@@ -90,150 +90,163 @@ scikit-learn>=1.3.0
 xgboost>=2.0.0
 numpy>=1.24.0
 pandas>=2.0.0
-nltk>=3.8.0
+matplotlib>=3.7.0
 PyPDF2>=3.0.0
 python-docx>=1.1.0
 ```
 
-Install all at once:
+Install everything at once:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-> **Note on XGBoost:** If `xgboost` is not installed, the XGBoost model is silently skipped and the app still works with LinearSVC and Logistic Regression.
-
-> **Note on NLTK:** NLTK data (stopwords, punkt, wordnet) is downloaded automatically on first run. If you're offline, preprocessing falls back to basic regex cleaning.
+> **Optional libraries:**
+> - `PyPDF2` — needed for PDF file upload support
+> - `python-docx` — needed for Word (.docx) file upload support
+>
+> The app still works without them — it just disables those file types and shows an install hint.
 
 ---
 
 ## 🎯 Features
 
-### 🔍 Single Input Tab
-- Type or paste any text
-- Get instant emotion prediction
-- See animated **probability distribution bars** for all 6 emotions
-- Confidence badge: Very High / High / Moderate / Low
+### 🔍 Single Text Tab
+- Type or paste any sentence, tweet, review, or paragraph
+- Instant emotion prediction with emoji + label
+- Confidence percentage display
+- Full **6-emotion bar chart** showing probability distribution for all classes
 
 ### 📂 Batch Processing Tab
 - Upload **CSV, TXT, PDF, or DOCX** files
-- Or paste multiple lines (one per line)
+- Or type multiple sentences directly
 - Live progress bar during analysis
-- Summary metrics: total, dominant emotion, unique emotions, avg confidence
-- Distribution bar chart across all predictions
-- Full results table
-- **Download results as CSV**
+- Results table with emotion + confidence per row
+- **Download results as CSV** with timestamp in filename
+- Emotion distribution bar chart summary
 
 ### 💡 Examples Tab
-- 18 curated example sentences across all 6 emotions
-- Click **"Try →"** to instantly prefill the Single Input tab
-- Quick-analyze dropdown with all examples
+- 10 pre-written example sentences spanning all 6 emotions
+- Click **Analyze** on any example to see prediction + chart
+- Only shows one chart at a time (no page clutter)
+- Download sample CSV or TXT files for batch testing
 
-### 🌗 Dark / Light Theme
-- Toggle between dark and light mode from the sidebar
-- All components adapt including result cards and probability bars
+---
 
-### 🤖 3 Models
-| Model | Type | Speed | Best For |
+## 🤖 Models
+
+| Model | Type | Vectorizer | Speed |
 |---|---|---|---|
-| ⚡ LinearSVC | Linear SVM | ★★★ Fastest | Sparse text — top performer |
-| 📈 Logistic Regression | Linear Classifier | ★★★ Fast | Interpretable probabilities |
-| 🌲 XGBoost | Gradient Boosting | ★★ Moderate | Non-linear patterns |
+| **Logistic Regression** | Linear Classifier | TF-IDF | ★★★ Fast |
+| **Linear SVM** | Linear SVM (LinearSVC) | TF-IDF | ★★★ Fastest |
+| **XGBoost** | Gradient Boosting | TF-IDF | ★★ Moderate |
+
+Switch between models using the **sidebar dropdown** — all three are loaded at startup and cached for instant switching.
 
 ---
 
 ## 🎭 Emotion Classes
 
-| Emotion | Emoji | Description |
+| Emotion | Emoji | Color |
 |---|---|---|
-| Joy | 😄 | Happiness, excitement, pride |
-| Sadness | 😢 | Grief, loneliness, loss |
-| Anger | 😡 | Fury, frustration, betrayal |
-| Fear | 😨 | Anxiety, terror, dread |
-| Love | ❤️ | Affection, warmth, care |
-| Surprise | 😲 | Shock, disbelief, astonishment |
+| Anger | 😠 | Red `#FF4444` |
+| Fear | 😨 | Purple `#9B59B6` |
+| Joy | 😊 | Yellow `#F1C40F` |
+| Love | ❤️ | Pink `#FF6B8A` |
+| Sadness | 😢 | Blue `#3498DB` |
+| Surprise | 😲 | Green `#2ECC71` |
 
 ---
 
 ## 🧱 Architecture
 
-The `src/` package follows a clean separation of concerns:
+The `src/` package is split into single-responsibility modules:
 
 ```
-main.py (UI)
-  │
-  ├── src/config.py          → EMOTION_PALETTE, MODEL_META, MODEL_PATHS constants
-  ├── src/model_loader.py    → load_all_models() → returns tfidf, encoder, models dict
-  ├── src/preprocess.py      → preprocess_text() → clean + tokenize + lemmatize
-  ├── src/predictor.py       → predict_emotion() → label, confidence, prob_dict
-  ├── src/file_processor.py  → extract_texts_from_file() → list of strings
-  └── src/visualizer.py      → render_result_card(), render_probability_bars() → HTML
+main.py  (Streamlit UI)
+    │
+    ├── src/config.py          →  All constants: paths, filenames, colors, emojis
+    ├── src/preprocess.py      →  clean_text(), split_into_sentences()
+    ├── src/file_processor.py  →  process_uploaded_file() → list of strings
+    ├── src/model_loader.py    →  load_vectorizer(), load_encoder(), load_all_models()
+    ├── src/predictor.py       →  predict_emotion() → (label, confidence, probs_dict)
+    └── src/visualizer.py      →  plot_confidence_scores() → matplotlib Figure
 ```
 
 ### Text Preprocessing Pipeline
 
-Every input goes through this pipeline before prediction:
+Every input goes through this sequence before prediction:
 
 ```
 Raw text
   → lowercase
   → remove punctuation
-  → remove numbers
-  → remove URLs
-  → remove HTML tags
-  → remove non-ASCII characters
-  → tokenize (NLTK)
-  → remove stopwords
-  → lemmatize (WordNetLemmatizer)
+  → remove digits
+  → remove extra whitespace
   → TF-IDF vectorize
   → model.predict()
+  → label_encoder.inverse_transform()
+  → emotion + confidence + probability distribution
 ```
+
+### Probability Handling
+
+| Model | Method |
+|---|---|
+| Logistic Regression | `predict_proba()` — native probabilities |
+| XGBoost | `predict_proba()` — native probabilities |
+| Linear SVM | `decision_function()` → softmax — all 6 class scores converted to probabilities |
+
+This ensures the confidence chart always shows all 6 bars regardless of the selected model.
 
 ---
 
-## 🔢 Batch File Format Guide
+## 📋 Batch File Format Guide
 
 | Format | How it's processed |
 |---|---|
-| **CSV** | First column with `object` dtype is used automatically |
-| **TXT** | Each line becomes one text sample (lines < 8 chars skipped) |
-| **PDF** | Text extracted page by page, line by line |
+| **CSV** | Uses `text` column if present; falls back to first text-type column |
+| **TXT** | Split into sentences at `.` `!` `?` boundaries |
+| **PDF** | Text extracted page by page, split into sentences |
 | **DOCX** | Each paragraph becomes one text sample |
 
-Maximum batch size: **200 texts per run**.
+**Maximum batch size:** 200 sentences per run (configurable in `main.py`).
 
 ---
 
 ## 🛠️ Bugs Fixed (v1.1)
 
-| # | File | Bug | Fix |
-|---|---|---|---|
-| 1 | `App/main.py` | `ex_text` set in session_state but Tab1 `text_area` never read it — "Try →" button had no effect | Added `value=st.session_state.pop("ex_text", "")` to the `text_area` |
-| 2 | `src/visualizer.py` | Hardcoded `#0f1626` dark gradient in `render_result_card` broke light mode | Made gradient end color theme-aware via new `theme` parameter |
-| 3 | `App/main.py` | After rerun, `user_text` always reset to empty (no `value=` binding) | Solved by Bug 1 fix — `value=` now binds correctly |
-| 4 | `App/main.py` | Sidebar model info used `var(--s2)` and `var(--muted)` CSS vars inside `st.markdown` HTML — unreliable in light mode | Replaced with concrete hex values computed from current theme |
-| 5 | `App/main.py` | Download CSV exported raw float Confidence (0.0–1.0) while table showed strings like `"87.3%"` | Added `export_df` with formatted Confidence before encoding |
-| 6 | `src/__init__.py` | `MODEL_PATHS` defined in `config.py` but not exported from the package | Added `MODEL_PATHS` to `__init__.py` exports and `__all__` |
+| # | File | Bug | Impact | Fix |
+|---|---|---|---|---|
+| 1 | `config.py` | `MODELS_DIR = 'models'` (wrong case) | 💥 Crash on Linux/macOS | Changed to `'Models'` |
+| 2 | `config.py` | All 3 model filenames were wrong | 💥 Models never load | Fixed to match actual `.joblib` filenames |
+| 3 | `config.py` | `VECTORIZER_FILE = 'vectorizer_BoW.joblib'` | 💥 Vectorizer never loads | Fixed to `tfidf_vectorizer.joblib` |
+| 4 | `config.py` | `ENCODER_FILE = 'encoder.joblib'` | 💥 Encoder never loads | Fixed to `label_encoder.joblib` |
+| 5 | `predictor.py` | LinearSVC has no `predict_proba` → chart showed 1 bar | 🔴 Wrong output | Added `decision_function` + softmax for all 6 classes |
+| 6 | `predictor.py` | Hardcoded `{0:'anger'...}` fallback when encoder is `None` | 🔴 Wrong output | Raises clear `ValueError` if encoder missing |
+| 7 | `file_processor.py` | Generic "unsupported" error when library missing | 🟡 Confusing UX | Shows exact `pip install` command needed |
+| 8 | `visualizer.py` | White matplotlib background broke dark mode | 🟡 Visual glitch | Set transparent figure + axes background |
+| 9 | `main.py` Tab3 | All previous example charts re-rendered on every click | 🟡 Page clutter | Only last-clicked example shows its chart |
 
 ---
 
 ## 🔮 Possible Future Improvements
 
-- Add a **confusion matrix** visualization tab
-- Support **multilingual** emotion detection
-- Add **Streamlit Cloud** deployment config (`secrets.toml`)
+- Add **confusion matrix** visualization from test set
+- Support **multilingual** text input
+- Add **word cloud** per emotion class
+- REST API wrapper with **FastAPI**
+- **Streamlit Cloud** deployment with `secrets.toml`
 - Hyperparameter tuning results display
-- Word cloud per emotion class
-- REST API wrapper with FastAPI
+- User feedback / correction loop
 
 ---
 
 ## 👨‍💻 Author
 
-Built as part of an **ML/NLP learning project** using:
-- Python · Scikit-learn · XGBoost · NLTK
-- Streamlit · Pandas · Joblib
-- TF-IDF vectorization · Label Encoding
+Built as part of an **ML/NLP learning project** by **Taimoor Tahir**
+
+Tech stack: Python · Scikit-learn · XGBoost · Streamlit · Pandas · Matplotlib · Joblib
 
 ---
 

@@ -1,25 +1,49 @@
-# src/predictor.py
 import numpy as np
-from .preprocess import preprocess_text
+from .preprocess import clean_text
 
 
-def predict_emotion(text: str, model, tfidf, encoder):
-    """Return predicted emotion, confidence, and probability dict."""
-    clean = preprocess_text(text)
-    vec = tfidf.transform([clean])
-    pred = model.predict(vec)[0]
-    label = encoder.inverse_transform([pred])[0]
+def predict_emotion(text, model, vectorizer, encoder):
+    """Predict emotion from text. Returns (emotion, confidence, probabilities_dict)."""
 
-    # Probabilities
-    if hasattr(model, "predict_proba"):
-        raw = model.predict_proba(vec)[0]
-        probs = {encoder.inverse_transform([i])[0]: float(p) for i, p in enumerate(raw)}
-    elif hasattr(model, "decision_function"):
-        dv = model.decision_function(vec)[0]
-        exp = np.exp(dv - dv.max())
-        raw = exp / exp.sum()
-        probs = {encoder.inverse_transform([i])[0]: float(p) for i, p in enumerate(raw)}
+    cleaned = clean_text(text)
+    if not cleaned:
+        return None, 0.0, {}
+
+    features = vectorizer.transform([cleaned])
+    pred_label = model.predict(features)[0]
+
+    # ── BUG-6 FIX: always use encoder, never rely on a hardcoded dict
+    # Raise a clear error if encoder is missing so the problem is obvious
+    if encoder is None:
+        raise ValueError(
+            "Label encoder is None. Check that label_encoder.joblib loaded correctly."
+        )
+    emotion = encoder.inverse_transform([pred_label])[0]
+
+    # ── BUG-5 FIX: LinearSVC has no predict_proba.
+    # Old code set probabilities = {} for that case → chart showed only 1 bar.
+    # Now we use decision_function + softmax to get a probability for every class.
+    if hasattr(model, 'predict_proba'):
+        raw_probs = model.predict_proba(features)[0]
+        probabilities = {
+            encoder.inverse_transform([i])[0]: float(p)
+            for i, p in enumerate(raw_probs)
+        }
+    elif hasattr(model, 'decision_function'):
+        # Softmax over decision scores → valid probability distribution
+        decision_scores = model.decision_function(features)[0]
+        exp_scores = np.exp(decision_scores - decision_scores.max())   # numerical stability
+        softmax_probs = exp_scores / exp_scores.sum()
+        probabilities = {
+            encoder.inverse_transform([i])[0]: float(p)
+            for i, p in enumerate(softmax_probs)
+        }
     else:
-        probs = {c: (1.0 if c == label else 0.0) for c in encoder.classes_}
+        # Absolute last resort: one-hot
+        probabilities = {
+            c: (1.0 if c == emotion else 0.0)
+            for c in encoder.classes_
+        }
 
-    return label, probs[label], probs
+    confidence = probabilities.get(emotion, 0.0)
+    return emotion, confidence, probabilities

@@ -1,24 +1,42 @@
-# src/config.py
+from pathlib import Path
 
-EMOTION_PALETTE = {
-    "anger":    {"emoji": "😡", "color": "#ff5c5c", "bg": "rgba(255,92,92,0.08)"},
-    "fear":     {"emoji": "😨", "color": "#c084fc", "bg": "rgba(192,132,252,0.08)"},
-    "joy":      {"emoji": "😄", "color": "#f5c542", "bg": "rgba(245,197,66,0.08)"},
-    "love":     {"emoji": "❤️", "color": "#f97da8", "bg": "rgba(249,125,168,0.08)"},
-    "sadness":  {"emoji": "😢", "color": "#4db8ff", "bg": "rgba(77,184,255,0.08)"},
-    "surprise": {"emoji": "😲", "color": "#34d9c3", "bg": "rgba(52,217,195,0.08)"},
+# Project root directory (parent of src folder)
+PROJECT_ROOT = Path(__file__).parent.parent
+
+# ── BUG-1 FIX: was 'models' (lowercase) → folder is 'Models' (capital M)
+# On Linux/macOS the filesystem is case-sensitive → FileNotFoundError on wrong case
+MODELS_DIR = PROJECT_ROOT / 'Models'
+
+# ── BUG-2 FIX: filenames were wrong (LogisticRegression_model.joblib etc.)
+# Corrected to match actual files saved on disk by the notebook
+MODEL_FILES = {
+    'Logistic Regression': 'logistic_regression_model.joblib',
+    'Linear SVM':          'linearsvc_model.joblib',
+    'XGBoost':             'xgboost_model.joblib',
 }
 
-MODEL_PATHS = {
-    "tfidf": "Models/tfidf_vectorizer.joblib",
-    "encoder": "Models/label_encoder.joblib",
-    "⚡ LinearSVC": "Models/linearsvc_model.joblib",
-    "📈 Logistic Regression": "Models/logistic_regression_model.joblib",
-    "🌲 XGBoost": "Models/xgboost_model.joblib",
+# ── BUG-3 FIX: was 'vectorizer_BoW.joblib' → actual file is tfidf_vectorizer.joblib
+VECTORIZER_FILE = 'tfidf_vectorizer.joblib'
+
+# ── BUG-4 FIX: was 'encoder.joblib' → actual file is label_encoder.joblib
+ENCODER_FILE = 'label_encoder.joblib'
+
+# Emotion colors for visualization
+EMOTION_COLORS = {
+    'anger':    '#FF4444',
+    'fear':     '#9B59B6',
+    'joy':      '#F1C40F',
+    'love':     '#FF6B8A',
+    'sadness':  '#3498DB',
+    'surprise': '#2ECC71',
 }
 
-MODEL_META = {
-    "⚡ LinearSVC": ("Linear SVM", "TF‑IDF", "★★★ Fastest", "Best for sparse text."),
-    "📈 Logistic Regression": ("Linear Classifier", "TF‑IDF", "★★★ Fast", "Interpretable probabilities."),
-    "🌲 XGBoost": ("Gradient Boosting", "TF‑IDF", "★★ Moderate", "Handles non‑linear patterns."),
+# Emotion emojis
+EMOTION_EMOJIS = {
+    'anger':    '😠',
+    'fear':     '😨',
+    'joy':      '😊',
+    'love':     '❤️',
+    'sadness':  '😢',
+    'surprise': '😲',
 }

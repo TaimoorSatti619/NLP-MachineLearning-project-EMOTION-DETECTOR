@@ -1,59 +1,66 @@
-# src/visualizer.py
-from .config import EMOTION_PALETTE
+import matplotlib.pyplot as plt
+import matplotlib
+from .config import EMOTION_COLORS, EMOTION_EMOJIS
 
 
-def render_probability_bars(probs: dict, top_emotion: str) -> str:
-    """Return HTML for probability bar chart."""
-    html = ""
-    for emo, p in sorted(probs.items(), key=lambda x: -x[1]):
-        cfg = EMOTION_PALETTE.get(emo, {"color": "#5b6ef5", "emoji": "❓"})
-        pct = p * 100
-        bold = "font-weight:600;" if emo == top_emotion else "opacity:.65;"
-        html += (
-            f'<div class="prob-row">'
-            f'<div class="prob-emo" style="{bold}color:{cfg["color"]}">{cfg["emoji"]} {emo}</div>'
-            f'<div class="prob-bg"><div class="prob-fill" style="width:{pct:.1f}%;background:{cfg["color"]};"></div></div>'
-            f'<div class="prob-val">{pct:.1f}%</div>'
-            f'</div>'
-        )
-    return html
+def get_emotion_color(emotion: str) -> str:
+    """Return hex color for a given emotion label."""
+    return EMOTION_COLORS.get(emotion, '#666666')
 
 
-def render_result_card(emotion: str, confidence: float, theme: str = "dark") -> str:
-    """Return HTML for the main result card.
-    
-    Args:
-        emotion: predicted emotion label
-        confidence: float 0-1
-        theme: 'dark' or 'light' — controls gradient end color
+def get_emotion_emoji(emotion: str) -> str:
+    """Return emoji for a given emotion label."""
+    return EMOTION_EMOJIS.get(emotion, '❓')
+
+
+def plot_confidence_scores(probabilities: dict, title: str = "Emotion Confidence Distribution"):
     """
-    cfg = EMOTION_PALETTE.get(emotion, {"emoji": "❓", "color": "#5b6ef5", "bg": "rgba(91,110,245,0.08)"})
-    if confidence > 0.80:
-        lvl = "Very High"
-        bb, bc = ("rgba(52,217,195,0.15)", "#34d9c3")
-    elif confidence > 0.60:
-        lvl = "High"
-        bb, bc = ("rgba(245,197,66,0.15)", "#f5c542")
-    elif confidence > 0.40:
-        lvl = "Moderate"
-        bb, bc = ("rgba(249,125,168,0.15)", "#f97da8")
-    else:
-        lvl = "Low"
-        bb, bc = ("rgba(107,120,158,0.15)", "#6b789e")
+    Create a bar chart of emotion probabilities.
 
-    # BUG 2 FIX: was hardcoded #0f1626 (near-black) which looks broken in light mode.
-    # Use a theme-aware neutral end color instead.
-    gradient_end = "#0f1626" if theme == "dark" else "#f5f7fc"
-    text_color   = "#eef2fb" if theme == "dark" else "#1a2639"
-    border_alpha = "22"
+    ── BUG-8 FIX: old code used plt.subplots() with default white figure background.
+    In Streamlit dark mode this produced a jarring white rectangle around the chart.
+    Fix: set both the figure and axes face-color to 'none' (transparent) so the chart
+    blends into whatever background color Streamlit uses (dark or light).
+    Also set all text / spine colors to a neutral mid-gray that works in both themes.
+    """
+    sorted_items = sorted(probabilities.items(), key=lambda x: x[1], reverse=True)
+    emotions  = [item[0].title() for item in sorted_items]
+    scores    = [item[1] * 100  for item in sorted_items]
+    colors    = [get_emotion_color(item[0]) for item in sorted_items]
 
-    return (
-        f'<div class="result-box" style="border-color:{cfg["color"]}{border_alpha};'
-        f'background:linear-gradient(160deg,{cfg["bg"]},{gradient_end});">'
-        f'<div class="result-emoji" style="font-size:3.5rem;line-height:1;margin-bottom:12px;">{cfg["emoji"]}</div>'
-        f'<div class="result-emo" style="font-size:1.8rem;font-weight:600;text-transform:capitalize;color:{cfg["color"]};margin-bottom:6px;">{emotion}</div>'
-        f'<div class="result-conf" style="font-size:0.85rem;color:#7a8aa3;">Confidence &nbsp;{confidence*100:.1f}%</div>'
-        f'<div class="conf-badge" style="display:inline-block;border-radius:20px;padding:4px 14px;'
-        f'font-size:12px;font-weight:500;margin-top:10px;background:{bb};color:{bc};">{lvl} Confidence</div>'
-        f'</div>'
-    )
+    # ── Transparent figure & axes so dark-mode Streamlit shows through
+    fig, ax = plt.subplots(figsize=(10, 5))
+    fig.patch.set_facecolor('none')          # transparent figure background
+    ax.set_facecolor('none')                 # transparent axes background
+
+    bars = ax.bar(emotions, scores, color=colors, edgecolor='white', linewidth=1.5)
+
+    # Neutral text color visible in both light and dark backgrounds
+    TEXT_COLOR = '#CCCCCC'
+
+    ax.set_xlabel('Emotion', fontsize=12, fontweight='bold', color=TEXT_COLOR)
+    ax.set_ylabel('Confidence Score (%)', fontsize=12, fontweight='bold', color=TEXT_COLOR)
+    ax.set_title(title, fontsize=14, fontweight='bold', pad=20, color=TEXT_COLOR)
+    ax.set_ylim(0, 110)   # extra room for value labels
+    ax.grid(axis='y', alpha=0.25, linestyle='--', color=TEXT_COLOR)
+
+    # Value labels on top of each bar
+    for bar, score in zip(bars, scores):
+        height = bar.get_height()
+        ax.text(
+            bar.get_x() + bar.get_width() / 2., height + 1.5,
+            f'{score:.1f}%',
+            ha='center', va='bottom',
+            fontweight='bold', fontsize=10, color=TEXT_COLOR
+        )
+
+    # Make spines and tick labels match the neutral color
+    for spine in ['top', 'right']:
+        ax.spines[spine].set_visible(False)
+    for spine in ['left', 'bottom']:
+        ax.spines[spine].set_color(TEXT_COLOR)
+    ax.tick_params(colors=TEXT_COLOR)
+    plt.xticks(rotation=0, ha='center')
+
+    plt.tight_layout()
+    return fig
