@@ -345,7 +345,7 @@ with tab3:
 # ── FOOTER ────────────────────────────────────────────────────────────────────
 st.markdown("""
 <div class="footer">
-    <p>🎭 <strong>Emotion Detection System</strong> | Built by <strong style="color:#667eea;">Shuban Ali</strong></p>
+    <p>🎭 <strong>Emotion Detection System</strong> | Built by <strong style="color:#667eea;">Taimoor Tahir Satti</strong></p>
     <p style="font-size:0.7rem; opacity:0.7;">© 2026 | NLP-based Emotion Recognition</p>
 </div>
 """, unsafe_allow_html=True)
